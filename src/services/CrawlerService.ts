@@ -54,6 +54,7 @@ export class CrawlerService {
       const movies = await this.doubanService.getMovieInfo(url);
       if (movies) {
         for (const movie of movies) {
+          await delay(20000);
           shouldContinue = await this.processMovie(movie, isIncremental);
           if (!shouldContinue) break;
           newMoviesCount++;
