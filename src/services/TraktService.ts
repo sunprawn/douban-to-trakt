@@ -148,10 +148,13 @@ export class TraktService {
   }
 
   /**
-   * Always read from the database: the process may run for months as a
-   * daemon, and the stored token is refreshed in place when it expires.
+   * Return a token that stays valid for at least marginMinutes, refreshing
+   * if needed. Always reads from the database: the process may run for
+   * months as a daemon, and the stored token is refreshed in place.
    */
-  public async getAccessToken(): Promise<string> {
+  public async ensureFreshToken(
+    marginMinutes = REFRESH_MARGIN_MINUTES
+  ): Promise<Token> {
     const tokens = await this.db.getTraktTokens();
 
     if (!tokens) {
@@ -160,15 +163,16 @@ export class TraktService {
       );
     }
 
-    const refreshDue = dayjs(tokens.expiresAt).subtract(
-      REFRESH_MARGIN_MINUTES,
-      'minute'
-    );
+    const refreshDue = dayjs(tokens.expiresAt).subtract(marginMinutes, 'minute');
     if (refreshDue.isBefore(dayjs())) {
-      const newTokens = await this.refreshAccessToken(tokens.refreshToken);
-      return newTokens.accessToken;
+      return this.refreshAccessToken(tokens.refreshToken);
     }
 
+    return tokens;
+  }
+
+  public async getAccessToken(): Promise<string> {
+    const tokens = await this.ensureFreshToken();
     return tokens.accessToken;
   }
 

@@ -28,7 +28,9 @@ access token 有效期 7 天，之后由程序自动刷新（refresh token 单�
 
 ### 常驻运行（Docker）
 
-镜像内置一个循环：每隔 `SYNC_INTERVAL_HOURS`（默认 24）小时跑一次同步，失败只记录日志、下一轮重试。
+镜像内置一个循环：每轮同步后等待 `SYNC_INTERVAL_HOURS`（默认 24）加上 0 到 `SYNC_JITTER_HOURS`（默认 2）
+小时的随机抖动再跑下一轮，避免固定时间访问豆瓣；失败只记录日志、下一轮重试。
+等待期间每天检查一次 Trakt token，剩余不足两天就刷新，所以同步间隔可以放心设成一周（`168` / `24`）。
 电影记录和 Trakt token 都存在 `/data/movies.db`，需要挂载到宿主机目录。
 
 首次部署时在容器里完成 Trakt 授权，token 直接写进挂载目录里的数据库；之后到期由容器自动刷新。
