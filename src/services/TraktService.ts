@@ -10,7 +10,6 @@ import { delay } from '../utils/helpers';
 export class TraktService {
   private static instance: TraktService;
   private db: DatabaseService;
-  private accessToken: string = '';
 
   private constructor() {
     this.db = DatabaseService.getInstance();
@@ -63,11 +62,11 @@ export class TraktService {
     };
   }
 
+  /**
+   * Always read from the database: the process may run for months as a
+   * daemon, and the stored token is refreshed in place when it expires.
+   */
   public async getAccessToken(): Promise<string> {
-    if (this.accessToken) {
-      return this.accessToken;
-    }
-
     const tokens = await this.db.getTraktTokens();
 
     if (!tokens) {
@@ -78,12 +77,10 @@ export class TraktService {
 
     if (dayjs(tokens.expiresAt).isBefore()) {
       const newTokens = await this.refreshAccessToken(tokens.refreshToken);
-      this.accessToken = newTokens.accessToken;
-    } else {
-      this.accessToken = tokens.accessToken;
+      return newTokens.accessToken;
     }
 
-    return this.accessToken;
+    return tokens.accessToken;
   }
 
   public async syncMovie(movie: Movie): Promise<void> {

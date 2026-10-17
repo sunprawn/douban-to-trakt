@@ -8,7 +8,8 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "server": "ts-node src/server.ts",
-    "sync": "ts-node src/sync.ts"
+    "sync": "ts-node src/sync.ts",
+    "daemon": "node dist/daemon.js"
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,5 @@
-import { CrawlerService } from './services/CrawlerService';
 import 'dotenv/config';
+import { CrawlerService } from './services/CrawlerService';
 
 async function main() {
   const userId = process.env.DOUBAN_USERNAME;
@@ -18,9 +18,13 @@ async function main() {
     await crawlerService.crawlMovies(userId, mode !== 'initial');
   } catch (error) {
     console.error('An error occurred during the crawling process:', error);
+    process.exitCode = 1;
   } finally {
     await crawlerService.close();
   }
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

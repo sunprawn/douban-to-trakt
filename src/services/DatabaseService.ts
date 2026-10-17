@@ -42,7 +42,8 @@ export class DatabaseService {
       rating INTEGER,
       imdb_id TEXT,
       rate_date TEXT,
-      douban_link TEXT
+      douban_link TEXT,
+      synced_at TEXT
     )`);
 
     await this.db.run(`CREATE TABLE IF NOT EXISTS trakt_tokens (
